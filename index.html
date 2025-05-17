@@ -77,7 +77,7 @@
             display: none !important;
         }
 
-        #modelNextBtn, #modelBackBtn, #colorNextBtn, #colorBackBtn {
+        #modelBackBtn, #colorBackBtn {
             padding: 10px;
             font-size: 1.5em;
             background-color: #2196F3;
@@ -86,9 +86,6 @@
             border-radius: 10px;
             cursor: pointer;
             margin-right: 10px;
-        }
-        #modelNextBtn:hover, #colorNextBtn:hover {
-            background-color: #1976D2;
         }
         #colorBackBtn, #modelBackBtn {
             background-color: #f44336;
@@ -108,14 +105,12 @@
     <div id="modelScreen" class="hidden">
         <h2>Select Handbag Model</h2>
         <div class="button-grid" id="modelButtons"></div>
-        <button id="modelNextBtn" onclick="onModelSelected()">Next</button>
         <button id="modelBackBtn" onclick="onBack()">Back</button>
     </div>
 
     <div id="colorScreen" class="hidden">
         <h2>Select Color</h2>
         <div class="button-grid" id="colorButtons"></div>
-        <button id="colorNextBtn" onclick="onColorSelected()">Next</button>
         <button id="colorBackBtn" onclick="onBack()">Back</button>
     </div>
     
@@ -170,9 +165,7 @@
                 btn.classList.toggle('selected', btn.dataset.model === model);
             });
             checkSelections();
-        }
 
-        function onModelSelected() {
             document.getElementById('modelScreen').classList.add('hidden');
             document.getElementById('colorScreen').classList.remove('hidden');
         }
@@ -183,9 +176,7 @@
                 btn.classList.toggle('selected', btn.dataset.color === color);
             });
             checkSelections();
-        }
 
-        function onColorSelected() {
             document.getElementById('colorScreen').classList.add('hidden'); 
             document.getElementById('bagsScreen').classList.remove('hidden');
         }
