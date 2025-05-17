@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Handbag Sales Register</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 10px;
+            margin: 0;
+        }
+
+        .button-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .big-button {
+            padding: 20px;
+            font-size: 3em;
+            border: none;
+            border-radius: 10px;
+            background-color: #f0f0f0;
+            cursor: pointer;
+            aspect-ratio: 1;
+        }
+
+        .big-button:hover {
+            background-color: #ddd;
+        }
+
+        .selected {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        #startSaleBtn {
+            width: 100%;
+            padding: 20px;
+            font-size: 1.5em;
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+
+        #registerBtn {
+            width: 100%;
+            padding: 20px;
+            font-size: 1.5em;
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+
+        #salesList {
+            list-style: none;
+            padding: 0;
+        }
+
+        .sale-item {
+            padding: 10px;
+            background-color: #f8f8f8;
+            margin-bottom: 5px;
+            border-radius: 5px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        #modelNextBtn, #modelBackBtn, #colorNextBtn, #colorBackBtn {
+            padding: 10px;
+            font-size: 1.5em;
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        #modelNextBtn:hover, #colorNextBtn:hover {
+            background-color: #1976D2;
+        }
+        #colorBackBtn, #modelBackBtn {
+            background-color: #f44336;
+        }
+        #colorBackBtn:hover, #modelBackBtn:hover {
+            background-color: #d32f2f;
+        }
+    </style>
+</head>
+<body>
+    <div id="startScreen" class="">
+        <button id="startSaleBtn" onclick="onStartSale()">Start Sale</button>
+        <h2>Sales:</h2>
+        <ul id="salesList"></ul>
+    </div>
+
+    <div id="modelScreen" class="hidden">
+        <h2>Select Handbag Model</h2>
+        <div class="button-grid" id="modelButtons"></div>
+        <button id="modelNextBtn" onclick="onModelSelected()">Next</button>
+        <button id="modelBackBtn" onclick="onBack()">Back</button>
+    </div>
+
+    <div id="colorScreen" class="hidden">
+        <h2>Select Color</h2>
+        <div class="button-grid" id="colorButtons"></div>
+        <button id="colorNextBtn" onclick="onColorSelected()">Next</button>
+        <button id="colorBackBtn" onclick="onBack()">Back</button>
+    </div>
+    
+    <div id="bagsScreen" class="hidden">
+        <button id="registerBtn" onclick="onRegisterSale()" disabled>Register Sale</button>
+    </div>
+
+    <script>
+        // Sample data - modify these arrays with your actual models and colors
+        const models = ['Classic', 'Satchel', 'Tote', 'Crossbody'];
+        const colors = ['Black', 'Red', 'Beige', 'Navy'];
+
+        let selectedModel = null;
+        let selectedColor = null;
+
+        const today = new Date().toISOString().split('T')[0];
+        console.log(today);
+        
+        // Check if the sales list for today exists in localStorage
+        if (!localStorage.getItem(today)) {
+            localStorage.setItem(today, JSON.stringify([]));
+        }
+        // Load sales from localStorage
+        const salesList = JSON.parse(localStorage.getItem(today));
+        salesList.forEach(sale => {
+            const saleItem = document.createElement('li');
+            saleItem.className = 'sale-item';
+            saleItem.textContent = sale;
+            document.getElementById('salesList').prepend(saleItem);
+        });
+
+        // Initialize model buttons
+        const modelContainer = document.getElementById('modelButtons');
+        models.forEach(model => {
+            const button = document.createElement('button');
+            button.className = 'big-button';
+            button.textContent = model;
+            button.dataset.model = model;
+            button.onclick = () => selectModel(model);
+            modelContainer.appendChild(button);
+        });
+
+        // Initialize color buttons
+        const colorContainer = document.getElementById('colorButtons');
+        colors.forEach(color => {
+            const button = document.createElement('button');
+            button.className = 'big-button';
+            button.textContent = color;
+            button.style.backgroundColor = color.toLowerCase();
+            button.dataset.color = color;
+            button.onclick = () => selectColor(color);
+            colorContainer.appendChild(button);
+        });
+
+        function onStartSale() {
+            document.getElementById('startScreen').classList.add('hidden');
+            document.getElementById('modelScreen').classList.remove('hidden');
+        }
+
+        function selectModel(model) {
+            selectedModel = model;
+            document.querySelectorAll('[data-model]').forEach(btn => {
+                btn.classList.toggle('selected', btn.dataset.model === model);
+            });
+            checkSelections();
+        }
+
+        function onModelSelected() {
+            document.getElementById('modelScreen').classList.add('hidden');
+            document.getElementById('colorScreen').classList.remove('hidden');
+        }
+
+        function selectColor(color) {
+            selectedColor = color;
+            document.querySelectorAll('[data-color]').forEach(btn => {
+                btn.classList.toggle('selected', btn.dataset.color === color);
+            });
+            checkSelections();
+        }
+
+        function onColorSelected() {
+            document.getElementById('colorScreen').classList.add('hidden'); 
+            document.getElementById('bagsScreen').classList.remove('hidden');
+        }
+
+        function onBack() {
+            document.getElementById('modelScreen').classList.add('hidden'); 
+            document.getElementById('colorScreen').classList.add('hidden'); 
+            document.getElementById('bagsScreen').classList.add('hidden'); 
+            document.getElementById('startScreen').classList.remove('hidden');
+            resetSelections();
+        }
+
+        function checkSelections() {
+            document.getElementById('registerBtn').disabled = !(selectedModel && selectedColor);
+        }
+
+        function resetSelections() {
+            selectedModel = null;
+            selectedColor = null;
+            document.querySelectorAll('.selected').forEach(btn => btn.classList.remove('selected'));
+            checkSelections();
+        }
+
+        // Register sale functionality
+        function onRegisterSale() {
+            const saleItem = document.createElement('li');
+            saleItem.className = 'sale-item';
+            saleItem.textContent = `${selectedModel} - ${selectedColor} - ${new Date().toLocaleTimeString()}`;
+            document.getElementById('salesList').prepend(saleItem);
+
+            // Save sales to localStorage 
+            salesList.unshift(saleItem.textContent);
+            localStorage.setItem(today, JSON.stringify(salesList));
+            
+            // Reset selections
+            resetSelections();
+            
+            // Hide bags screen
+            document.getElementById('bagsScreen').classList.add('hidden');
+
+            // Go back to start screen
+            document.getElementById('startScreen').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
