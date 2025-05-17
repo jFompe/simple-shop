@@ -134,18 +134,7 @@
         const today = new Date().toISOString().split('T')[0];
         console.log(today);
         
-        // Check if the sales list for today exists in localStorage
-        if (!localStorage.getItem(today)) {
-            localStorage.setItem(today, JSON.stringify([]));
-        }
-        // Load sales from localStorage
-        const salesList = JSON.parse(localStorage.getItem(today));
-        salesList.forEach(sale => {
-            const saleItem = document.createElement('li');
-            saleItem.className = 'sale-item';
-            saleItem.textContent = sale;
-            document.getElementById('salesList').prepend(saleItem);
-        });
+        updateSalesList();
 
         // Initialize model buttons
         const modelContainer = document.getElementById('modelButtons');
@@ -220,16 +209,58 @@
             checkSelections();
         }
 
+        function getSales() {
+            // Check if the sales list for today exists in localStorage
+            if (!localStorage.getItem(today)) {
+                localStorage.setItem(today, JSON.stringify([]));
+            }
+            // Load sales from localStorage
+            return JSON.parse(localStorage.getItem(today));
+        }
+
+        function saleToString({model, color, time}) {
+            return `${model} - ${color} - ${time}`;
+        }
+
+        function addSale(model, color) {
+            const sales = getSales();
+            sales.push({model, color, time: new Date().toLocaleTimeString()});
+            localStorage.setItem(today, JSON.stringify(sales));
+        }
+
+        // Function to handle the registration of a sale
+        // and update the sales list
+        function updateSalesList() {
+            const salesList = getSales();
+            const salesListElement = document.getElementById('salesList');
+            salesListElement.innerHTML = ''; // Clear the list
+            salesList.forEach(sale => {
+                const saleItem = document.createElement('li');
+                saleItem.className = 'sale-item';
+                saleItem.textContent = saleToString(sale);
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.textContent = 'Delete';
+                deleteBtn.onclick = () => {
+                    saleItem.remove();
+                    const updatedSalesList = salesList.filter(sale => saleToString(sale) !== saleItem.firstChild.textContent);
+                    localStorage.setItem(today, JSON.stringify(updatedSalesList));
+                };
+                saleItem.appendChild(deleteBtn);
+
+                salesListElement.appendChild(saleItem); // or prependChild to add to the top
+            });
+        }
+
         // Register sale functionality
         function onRegisterSale() {
-            const saleItem = document.createElement('li');
-            saleItem.className = 'sale-item';
-            saleItem.textContent = `${selectedModel} - ${selectedColor} - ${new Date().toLocaleTimeString()}`;
-            document.getElementById('salesList').prepend(saleItem);
 
-            // Save sales to localStorage 
-            salesList.unshift(saleItem.textContent);
-            localStorage.setItem(today, JSON.stringify(salesList));
+            // Add the sale to localStorage
+            // and update the sales list
+            addSale(selectedModel, selectedColor);
+
+            // Update the sales list
+            updateSalesList();
             
             // Reset selections
             resetSelections();
