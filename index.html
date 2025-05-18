@@ -61,11 +61,6 @@
             margin-bottom: 20px;
         }
 
-        #salesList {
-            list-style: none;
-            padding: 0;
-        }
-
         .sale-item {
             padding: 10px;
             background-color: #f8f8f8;
@@ -133,7 +128,25 @@
     <div id="startScreen" class="hidden">
         <button id="startSaleBtn" onclick="onStartSale()">Start Sale</button>
         <h2>Sales:</h2>
-        <ul id="salesList"></ul>
+        <table id="salesTable">
+            <thead>
+                <tr>
+                    <th>Modelo</th>
+                    <th>Color</th>
+                    <th>Papel S</th>
+                    <th>Papel M</th>
+                    <th>Papel L</th>
+                    <th>Tela XS</th>
+                    <th>Tela S</th>
+                    <th>Tela M</th>
+                    <th>Tela L</th>
+                    <th>Hora</th>
+                </tr>
+            </thead>
+            <tbody id="salesTableBody">
+                <!-- Sales will be dynamically added here -->
+            </tbody>
+        </table>
     </div>
 
     <div id="modelScreen" class="hidden">
@@ -184,7 +197,7 @@
         const today = new Date().toISOString().split('T')[0];
         console.log(today);
         
-        updateSalesList();
+        updateSalesTable();
 
         const dropZone = document.getElementById('drop-zone');
         dropZone.addEventListener('drop', async (e) => {
@@ -348,16 +361,46 @@
         }
 
         // Function to handle the registration of a sale
-        // and update the sales list
-        function updateSalesList() {
+        // and update the sales table
+        function updateSalesTable() {
             const salesList = getSales();
-            const salesListElement = document.getElementById('salesList');
-            salesListElement.innerHTML = ''; // Clear the list
+            const salesTableElement = document.getElementById('salesTableBody');
+            salesTableElement.innerHTML = ''; // Clear the list
             salesList.forEach(sale => {
-                const saleItem = document.createElement('li');
+                const saleItem = document.createElement('tr');
+                const saleModel = document.createElement('td');
+                const saleColor = document.createElement('td');
+                const salePaperS = document.createElement('td');
+                const salePaperM = document.createElement('td');
+                const salePaperL = document.createElement('td');
+                const saleClothXS = document.createElement('td');
+                const saleClothS = document.createElement('td');
+                const saleClothM = document.createElement('td');
+                const saleClothL = document.createElement('td');
+                const saleTime = document.createElement('td');
                 saleItem.className = 'sale-item';
-                saleItem.textContent = saleToString(sale);
-
+                saleModel.textContent = sale.model;
+                saleColor.textContent = sale.color;
+                salePaperS.textContent = document.getElementById('paper-bags-s').value;
+                salePaperM.textContent = document.getElementById('paper-bags-m').value;
+                salePaperL.textContent = document.getElementById('paper-bags-l').value;
+                saleClothXS.textContent = document.getElementById('cloth-bags-xs').value;
+                saleClothS.textContent = document.getElementById('cloth-bags-s').value;
+                saleClothM.textContent = document.getElementById('cloth-bags-m').value;
+                saleClothL.textContent = document.getElementById('cloth-bags-l').value;
+                saleTime.textContent = sale.time;
+                saleItem.appendChild(saleModel);
+                saleItem.appendChild(saleColor);
+                saleItem.appendChild(salePaperS);
+                saleItem.appendChild(salePaperM);
+                saleItem.appendChild(salePaperL);
+                saleItem.appendChild(saleClothXS);
+                saleItem.appendChild(saleClothS);
+                saleItem.appendChild(saleClothM);
+                saleItem.appendChild(saleClothL);
+                saleItem.appendChild(saleTime);
+                
+                // Add delete button
                 const deleteBtn = document.createElement('button');
                 deleteBtn.textContent = 'Delete';
                 deleteBtn.onclick = () => {
@@ -367,7 +410,7 @@
                 };
                 saleItem.appendChild(deleteBtn);
 
-                salesListElement.appendChild(saleItem); // or prependChild to add to the top
+                salesTableElement.appendChild(saleItem); // or prependChild to add to the top
             });
         }
 
@@ -381,7 +424,7 @@
             addSale(selectedModel, selectedColor);
 
             // Update the sales list
-            updateSalesList();
+            updateSalesTable();
             
             // Reset selections
             resetSelections();
