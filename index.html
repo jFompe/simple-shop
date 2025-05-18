@@ -218,20 +218,8 @@
                 button.className = 'big-button';
                 button.textContent = model.name;
                 button.dataset.model = model.name;
-                button.onclick = () => selectModel(model.name);
+                button.onclick = () => selectModel(model);
                 modelContainer.appendChild(button);
-            });
-
-            // Initialize color buttons
-            const colorContainer = document.getElementById('colorButtons');
-            inventory.colors.forEach(color => {
-                const button = document.createElement('button');
-                button.className = 'big-button';
-                button.textContent = color.name;
-                button.style.backgroundColor = color.name.toLowerCase();
-                button.dataset.color = color.name;
-                button.onclick = () => selectColor(color.name);
-                colorContainer.appendChild(button);
             });
             
             // Go to start screen
@@ -245,11 +233,28 @@
         }
 
         function selectModel(model) {
-            selectedModel = model;
+            selectedModel = model.name;
             document.querySelectorAll('[data-model]').forEach(btn => {
-                btn.classList.toggle('selected', btn.dataset.model === model);
+                btn.classList.toggle('selected', btn.dataset.model === model.name);
             });
             checkSelections();
+
+
+            // Initialize color buttons
+            const inventory = JSON.parse(localStorage.getItem('inventory'));
+            const colorContainer = document.getElementById('colorButtons');
+            colorContainer.innerHTML = ''; // Clear previous buttons
+            inventory.colors
+                .filter(color => model.colors.includes(color.code))
+                .forEach(color => {
+                    const button = document.createElement('button');
+                    button.className = 'big-button';
+                    button.textContent = color.name;
+                    button.style.backgroundColor = color.name.toLowerCase();
+                    button.dataset.color = color.name;
+                    button.onclick = () => selectColor(color.name);
+                    colorContainer.appendChild(button);
+                });
 
             document.getElementById('modelScreen').classList.add('hidden');
             document.getElementById('colorScreen').classList.remove('hidden');
