@@ -117,6 +117,40 @@
             margin-top: 15px;
             font-family: monospace;
         }
+
+        #salesTableBody {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        #salesTable {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        #salesTable th, #salesTable td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        #salesTable th {
+            background-color: #f2f2f2;
+        }
+        #salesTable tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        #salesTable tr:hover {
+            background-color: #ddd;
+        }
+        #salesTable button {
+            background-color: #f44336;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #salesTable button:hover {
+            background-color: #d32f2f;
+        }
     </style>
 </head>
 <body>
@@ -354,9 +388,9 @@
             return `${model} - ${color} - ${time}`;
         }
 
-        function addSale(model, color) {
+        function addSale(model, color, paperBags, clothBags) {
             const sales = getSales();
-            sales.push({model, color, time: new Date().toLocaleTimeString()});
+            sales.push({model, color, paperBags, clothBags, time: new Date().toLocaleTimeString()});
             localStorage.setItem(today, JSON.stringify(sales));
         }
 
@@ -381,13 +415,13 @@
                 saleItem.className = 'sale-item';
                 saleModel.textContent = sale.model;
                 saleColor.textContent = sale.color;
-                salePaperS.textContent = document.getElementById('paper-bags-s').value;
-                salePaperM.textContent = document.getElementById('paper-bags-m').value;
-                salePaperL.textContent = document.getElementById('paper-bags-l').value;
-                saleClothXS.textContent = document.getElementById('cloth-bags-xs').value;
-                saleClothS.textContent = document.getElementById('cloth-bags-s').value;
-                saleClothM.textContent = document.getElementById('cloth-bags-m').value;
-                saleClothL.textContent = document.getElementById('cloth-bags-l').value;
+                salePaperS.textContent = sale?.paperBags?.S || '';
+                salePaperM.textContent = sale?.paperBags?.M || '';
+                salePaperL.textContent = sale?.paperBags?.L || '';
+                saleClothXS.textContent = sale?.clothBags?.XS || '';
+                saleClothS.textContent = sale?.clothBags?.S || '';
+                saleClothM.textContent = sale?.clothBags?.M || '';
+                saleClothL.textContent = sale?.clothBags?.L || '';
                 saleTime.textContent = sale.time;
                 saleItem.appendChild(saleModel);
                 saleItem.appendChild(saleColor);
@@ -421,7 +455,18 @@
             // and update the sales list
             selectedModel = document.getElementById('model-input').value;
             selectedColor = document.getElementById('color-input').value;
-            addSale(selectedModel, selectedColor);
+            const paperBags = {
+                S: document.getElementById('paper-bags-s').value || 0,
+                M: document.getElementById('paper-bags-m').value || 0,
+                L: document.getElementById('paper-bags-l').value || 0
+            }
+            const clothBags = {
+                XS: document.getElementById('cloth-bags-xs').value || 0,
+                S: document.getElementById('cloth-bags-s').value || 0,
+                M: document.getElementById('cloth-bags-m').value || 0,
+                L: document.getElementById('cloth-bags-l').value || 0
+            }
+            addSale(selectedModel, selectedColor, paperBags, clothBags);
 
             // Update the sales list
             updateSalesTable();
