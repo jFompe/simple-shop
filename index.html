@@ -93,10 +93,44 @@
         #colorBackBtn:hover, #modelBackBtn:hover {
             background-color: #d32f2f;
         }
+
+        #drop-zone {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border: 2px dashed #555;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 300px;
+        }
+        #drop-zone.dragover {
+            border-color: #3a7fb6;
+            background-color: #ffffff08;
+        }
+
+        #file-input {
+            background-color: #3a7fb6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 15px;
+            font-family: monospace;
+        }
     </style>
 </head>
 <body>
-    <div id="startScreen" class="">
+    <div id="drop-zone" class="">
+        <h2>Drop your inventory file here</h2>
+        <input type="file" id="file-input" accept=".json" />
+    </div>
+
+    <div id="startScreen" class="hidden">
         <button id="startSaleBtn" onclick="onStartSale()">Start Sale</button>
         <h2>Sales:</h2>
         <ul id="salesList"></ul>
@@ -119,9 +153,9 @@
     </div>
 
     <script>
-        // Sample data - modify these arrays with your actual models and colors
-        const models = ['Classic', 'Satchel', 'Tote', 'Crossbody'];
-        const colors = ['Black', 'Red', 'Beige', 'Navy'];
+        if (localStorage.getItem('inventory')) {
+            onInventoryLoaded();
+        }
 
         let selectedModel = null;
         let selectedColor = null;
@@ -131,28 +165,79 @@
         
         updateSalesList();
 
-        // Initialize model buttons
-        const modelContainer = document.getElementById('modelButtons');
-        models.forEach(model => {
-            const button = document.createElement('button');
-            button.className = 'big-button';
-            button.textContent = model;
-            button.dataset.model = model;
-            button.onclick = () => selectModel(model);
-            modelContainer.appendChild(button);
+        const dropZone = document.getElementById('drop-zone');
+        dropZone.addEventListener('drop', async (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            const file = e.dataTransfer.files[0];
+            if (file) await handleFile(file);
+        });
+        // Drag and drop events
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
         });
 
-        // Initialize color buttons
-        const colorContainer = document.getElementById('colorButtons');
-        colors.forEach(color => {
-            const button = document.createElement('button');
-            button.className = 'big-button';
-            button.textContent = color;
-            button.style.backgroundColor = color.toLowerCase();
-            button.dataset.color = color;
-            button.onclick = () => selectColor(color);
-            colorContainer.appendChild(button);
+        dropZone.addEventListener('dragleave', (e) => {
+            dropZone.classList.remove('dragover');
         });
+
+        // Handle file input change
+        async function handleFile(file) {
+            const buffer = await new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = reject;
+                reader.readAsText(file);
+            });
+
+            const content = buffer.toString();
+            console.log(content);
+            localStorage.setItem('inventory', content);
+            onInventoryLoaded();
+        }
+
+        const fileInput = document.getElementById('file-input');
+        fileInput.addEventListener('change', (ev) => {
+            if (ev.target.files[0]) {
+                handleFile(ev.target.files[0])
+                    .catch(err => {
+                        console.error(err);
+                        alert('Error reading file');
+                    });
+            }
+        });
+
+        function onInventoryLoaded() {
+            const inventory = JSON.parse(localStorage.getItem('inventory'));
+
+            // Initialize model buttons
+            const modelContainer = document.getElementById('modelButtons');
+            inventory.models.forEach(model => {
+                const button = document.createElement('button');
+                button.className = 'big-button';
+                button.textContent = model.name;
+                button.dataset.model = model.name;
+                button.onclick = () => selectModel(model.name);
+                modelContainer.appendChild(button);
+            });
+
+            // Initialize color buttons
+            const colorContainer = document.getElementById('colorButtons');
+            inventory.colors.forEach(color => {
+                const button = document.createElement('button');
+                button.className = 'big-button';
+                button.textContent = color.name;
+                button.style.backgroundColor = color.name.toLowerCase();
+                button.dataset.color = color.name;
+                button.onclick = () => selectColor(color.name);
+                colorContainer.appendChild(button);
+            });
+            
+            // Go to start screen
+            document.getElementById('drop-zone').classList.add('hidden');
+            document.getElementById('startScreen').classList.remove('hidden');
+        }
 
         function onStartSale() {
             document.getElementById('startScreen').classList.add('hidden');
