@@ -150,6 +150,27 @@
     
     <div id="bagsScreen" class="hidden">
         <button id="registerBtn" onclick="onRegisterSale()" disabled>Register Sale</button>
+
+        <div>
+            <h2>Bolso</h2>
+            <input type="text" id="model-input" />
+            <input type="text" id="color-input" />
+        </div>
+
+        <div>
+            <h2>Bolsas de papel</h2>
+            <input type="number" id="paper-bags-s" placeholder="Bolsas de papel S" min="0" />
+            <input type="number" id="paper-bags-m" placeholder="Bolsas de papel M" min="0" />
+            <input type="number" id="paper-bags-l" placeholder="Bolsas de papel L" min="0" />
+        </div>
+
+        <div>
+            <h2>Bolsas de tela</h2>
+            <input type="number" id="cloth-bags-xs" placeholder="Bolsas de tela XS" min="0" />
+            <input type="number" id="cloth-bags-s" placeholder="Bolsas de tela S" min="0" />
+            <input type="number" id="cloth-bags-m" placeholder="Bolsas de tela M" min="0" />
+            <input type="number" id="cloth-bags-l" placeholder="Bolsas de tela L" min="0" />
+        </div>
     </div>
 
     <script>
@@ -237,8 +258,8 @@
             document.querySelectorAll('[data-model]').forEach(btn => {
                 btn.classList.toggle('selected', btn.dataset.model === model.name);
             });
+            document.getElementById('model-input').value = selectedModel;
             checkSelections();
-
 
             // Initialize color buttons
             const inventory = JSON.parse(localStorage.getItem('inventory'));
@@ -265,7 +286,24 @@
             document.querySelectorAll('[data-color]').forEach(btn => {
                 btn.classList.toggle('selected', btn.dataset.color === color);
             });
+            document.getElementById('color-input').value = selectedColor;
             checkSelections();
+
+            // Set the bags screen
+            if (selectedModel.includes(' XL')) {
+                document.getElementById('paper-bags-l').value = 1;
+                document.getElementById('cloth-bags-l').value = 1;
+            } else if (selectedModel.includes(' M')) {
+                document.getElementById('paper-bags-m').value = 1;
+                document.getElementById('cloth-bags-m').value = 1;
+            } else if (selectedModel.includes(' XS') || selectedModel.includes('Lugano')) {
+                document.getElementById('paper-bags-s').value = 1;
+                document.getElementById('cloth-bags-xs').value = 1;
+            } else {
+                // Default case (S)
+                document.getElementById('paper-bags-s').value = 1;
+                document.getElementById('cloth-bags-s').value = 1;
+            }
 
             document.getElementById('colorScreen').classList.add('hidden'); 
             document.getElementById('bagsScreen').classList.remove('hidden');
@@ -338,6 +376,8 @@
 
             // Add the sale to localStorage
             // and update the sales list
+            selectedModel = document.getElementById('model-input').value;
+            selectedColor = document.getElementById('color-input').value;
             addSale(selectedModel, selectedColor);
 
             // Update the sales list
